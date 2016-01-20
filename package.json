@@ -1,0 +1,23 @@
+{
+  "name": "sync-support-calendar",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "calendar-model": "github:nigelsdtech/calendar-model",
+    "gmail-model": "github:nigelsdtech/gmail-model",
+    "config": "1.x",
+    "log4js": "0.x"
+  },
+  "scripts": {
+    "start": "sh scripts/start.sh",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Nigel D'Souza",
+  "license": "ISC",
+  "description": "Syncronizes the support rota with my work primary calendar",
+  "config": {
+    "appName": "sync-support-calendar",
+    "googleAuthScopes": "https://www.googleapis.com/auth/calendar, https://mail.google.com/"
+  }
+}
