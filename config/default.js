@@ -1,0 +1,1 @@
+../../master-store/configs/default.js
