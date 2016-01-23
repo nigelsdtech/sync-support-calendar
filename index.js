@@ -79,7 +79,6 @@ function addShift (supportRotaEv) {
   newEv.end       = supportRotaEv.end;
   newEv.reminders = supportRotaEv.reminders;
   newEv.attendees = cfg.get('calendars.workPrimary.attendees');
-  newEv.hangoutLink = '';
 
   log.info('========')
   log.info('Creating shift:')
@@ -106,7 +105,6 @@ function addShift (supportRotaEv) {
     reminderEv.reminders = {setDefault: 1}
     reminderEv.start = {dateTime: timeMin}
     reminderEv.end = {dateTime: timeMax}
-    reminderEv.hangoutLink = '';
   
     workPrimary.addEventToGoogle(reminderEv);
   }
