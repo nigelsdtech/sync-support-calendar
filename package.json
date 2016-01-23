@@ -17,6 +17,15 @@
   "description": "Syncronizes the support rota with my work primary calendar",
   "config": {
     "appName": "sync-support-calendar",
-    "googleAuthScopes": "https://www.googleapis.com/auth/calendar, https://mail.google.com/"
-  }
+    "googleAuthScopes": "https://www.googleapis.com/auth/calendar"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nigelsdtech/sync-support-calendar.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nigelsdtech/sync-support-calendar/issues"
+  },
+  "homepage": "https://github.com/nigelsdtech/sync-support-calendar#readme",
+  "devDependencies": {}
 }
