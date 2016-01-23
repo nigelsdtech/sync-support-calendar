@@ -4,7 +4,6 @@
   "main": "index.js",
   "dependencies": {
     "calendar-model": "github:nigelsdtech/calendar-model",
-    "gmail-model": "github:nigelsdtech/gmail-model",
     "config": "1.x",
     "log4js": "0.x"
   },
