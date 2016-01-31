@@ -46,8 +46,10 @@ if (cfg.has('useHandoverReminders')) {
   useHandoverReminders = cfg.get('useHandoverReminders');
 }
 
+
+
 /*
- * Setup calendare
+ * Setup calendars
  */
 
 var calendarParams = {
@@ -66,7 +68,6 @@ calendarParams.name             = "Support Rota"
 calendarParams.calendarId       = cfg.get('calendars.support.calendarId')
 
 var supportRota = new calendarModel(calendarParams);
-
 
 
 
@@ -155,6 +156,7 @@ function removeShift (ev) {
 }
 
 
+
 // Search time is between 00:00 this morning and 2 months from then
 // I.e. you're syncing all events between today and 2 months hence.
 var d = new Date();
@@ -220,6 +222,7 @@ supportRota.loadEventsFromGoogle(params, function (srEvs) {
 
           log.info('+ Matched event: ' + wpEvStr);
 	  matched = true
+
 	  delete wpEvs[j];
 	  break
 
