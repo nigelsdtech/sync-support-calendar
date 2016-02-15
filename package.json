@@ -5,6 +5,7 @@
   "dependencies": {
     "calendar-model": "github:nigelsdtech/calendar-model",
     "config": "1.x",
+    "googleapis": "~2.1.6",
     "log4js": "0.x"
   },
   "scripts": {
@@ -12,7 +13,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "Nigel D'Souza",
+  "author": "Nigel Stephen D'Souza",
   "license": "ISC",
   "description": "Syncronizes the support rota with my work primary calendar",
   "config": {

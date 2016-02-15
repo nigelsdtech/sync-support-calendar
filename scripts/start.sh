@@ -2,7 +2,7 @@
 
 . ~/bin/setup_node_env.sh
 
-echo "Calendar ID = $OB_SUPPORT_ROTA_CALENDAR_ID"
+appname=${PWD##*/}
 
 node index.js \
-	--NODE_APP_INSTANCE="sync-support-calendar";
+	--NODE_APP_INSTANCE="$appname";
