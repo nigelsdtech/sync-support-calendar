@@ -74,12 +74,14 @@ var supportRota = new calendarModel(calendarParams);
 
 function addShift (supportRotaEv) {
 
+  var attendees = cfg.get('calendars.workPrimary.attendees');
+  
   var newEv = {}
   newEv.summary   = supportRotaEv.summary;
   newEv.start     = supportRotaEv.start;
   newEv.end       = supportRotaEv.end;
   newEv.reminders = supportRotaEv.reminders;
-  newEv.attendees = cfg.get('calendars.workPrimary.attendees');
+  newEv.attendees = attendees;
 
   log.info('========')
   log.info('Creating shift:')
@@ -98,15 +100,16 @@ function addShift (supportRotaEv) {
   
     // The reminder goes off at 9 am the next day
     var d = new Date(newEv.start.dateTime);
-    var timeMin = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1, 9, 0);
-    var timeMax = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1, 9, 1);
+    var startTime = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1, 9, 0);
+    var endTime   = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1, 9, 1);
   
     var reminderEv = {}
-    reminderEv.summary = "Send handover email"
+    reminderEv.summary   = "Send handover email"
     reminderEv.reminders = {setDefault: 1}
-    reminderEv.start = {dateTime: timeMin}
-    reminderEv.end = {dateTime: timeMax}
-  
+    reminderEv.start     = {dateTime: startTime}
+    reminderEv.end       = {dateTime: endTime}
+    reminderEv.attendees = attendees;
+
     workPrimary.addEventToGoogle(reminderEv);
   }
 
