@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
-    "calendar-model": "github:nigelsdtech/calendar-model",
+    "calendar-model": "git://github.com/nigelsdtech/calendar-model.git#aa9936399e042edf4749c2aec770205c1e0e2dd1",
     "config": "1.x",
     "googleapis": "~2.1.6",
     "log4js": "0.x"

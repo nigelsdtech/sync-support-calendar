@@ -3,7 +3,7 @@ module.exports = {
   calendars: {
     support: {
       calendarId:     process.env.OB_SUPPORT_ROTA_CALENDAR_ID,
-      usernameSearch: process.env.OB_USERNAME
+      usernameSearch: "OOH"
     },
     workPrimary: {
       calendarId: "primary",

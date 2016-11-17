@@ -126,7 +126,7 @@ function removeShift (ev) {
 
   // If it is an L1 event, delete next morning's reminder
   if (useHandoverReminders
-      && ev.summary == cfg.get('calendars.support.usernameSearch')+" L1") {
+      && ev.summary == cfg.get('calendars.support.usernameSearch')+" (L1)") {
   
     log.info('Removing reminder for L1 shift')
   
