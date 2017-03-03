@@ -192,15 +192,15 @@ supportRota.loadEventsFromGoogle(params, function (srEvs) {
 
       var id        = srEv.id;
       var summary   = srEv.summary;
-      var startTime = srEv.start.dateTime;
-      var endTime   = srEv.end.dateTime;
+      var startTime = new Date(srEv.start.dateTime);
+      var endTime   = new Date(srEv.end.dateTime);
       var srEvStr   = supportRota.getEventString(srEv)
 
       log.info('Comparing event: ' + srEvStr);
-      log.trace('Event Id:      ' + id);
-      log.trace('Event summary: ' + summary);
-      log.trace('Start Time:    ' + startTime);
-      log.trace('End Time:      ' + endTime);
+      log.debug('Event Id:      ' + id);
+      log.debug('Event summary: ' + summary);
+      log.debug('Start Time:    ' + startTime);
+      log.debug('End Time:      ' + endTime);
 
 
       var matched = false
@@ -211,16 +211,20 @@ supportRota.loadEventsFromGoogle(params, function (srEvs) {
 
         var id2        = wpEv.id;
         var summary2   = wpEv.summary;
-        var startTime2 = wpEv.start.dateTime;
-        var endTime2   = wpEv.end.dateTime;
+        var startTime2 = new Date(wpEv.start.dateTime);
+        var endTime2   = new Date(wpEv.end.dateTime);
       
 	var wpEvStr = workPrimary.getEventString(wpEv)
 
-	log.trace('+--> Comparison Event: ' + wpEvStr);
+	log.debug('+--> Comparison Event: ' + wpEvStr);
+        log.debug('Event Id:      ' + id2);
+        log.debug('Event summary: ' + summary2);
+        log.debug('Start Time:    ' + startTime2);
+        log.debug('End Time:      ' + endTime2);
 
 	if (summary == summary2
-	    && startTime == startTime2
-	    && endTime == endTime2
+	    && startTime.getTime() == startTime2.getTime()
+	    && endTime.getTime() == endTime2.getTime()
 	) {
 
           log.info('+ Matched event: ' + wpEvStr);
