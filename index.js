@@ -89,7 +89,7 @@ function addShift (supportRotaEv) {
   log.info('Start Time: ' + newEv.start.dateTime);
   log.info('End Time:   ' + newEv.end.dateTime);
   
-  workPrimary.addEventToGoogle(newEv);
+  workPrimary.addEventToGoogle(newEv, function(resp) {});
   
   // If it is an L1 event, add a reminder the next morning
   if (useHandoverReminders
@@ -110,7 +110,7 @@ function addShift (supportRotaEv) {
     reminderEv.end       = {dateTime: endTime}
     reminderEv.attendees = attendees;
 
-    workPrimary.addEventToGoogle(reminderEv);
+    workPrimary.addEventToGoogle(reminderEv, function(resp) {});
   }
 
 
