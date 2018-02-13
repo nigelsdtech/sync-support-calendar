@@ -122,7 +122,7 @@ function addShift (supportRotaEv) {
 
 function removeShift (ev) {
 
-  workPrimary.deleteEventFromGoogle(ev)
+  workPrimary.deleteEventFromGoogle(ev, function () {})
 
   // If it is an L1 event, delete next morning's reminder
   if (useHandoverReminders
