@@ -19,7 +19,7 @@ var calendarModel = require('calendar-model')
 
 // logs 
 
-log4js.configure(cfg.get('log.log4jsConfigs'));
+log4js.configure(cfg.log.log4jsConfigs);
 
 var log = log4js.getLogger(cfg.get('log.appName'));
 log.setLevel(cfg.get('log.level'));
@@ -41,59 +41,67 @@ log.info('============');
  * Global configs
  */
 
-var useHandoverReminders = false;
-if (cfg.has('useHandoverReminders')) {
-  useHandoverReminders = cfg.get('useHandoverReminders');
-}
-
-
+const useHandoverReminders = (cfg.has('useHandoverReminders'))? cfg.useHandoverReminders : false;
+const monthsToLookAhead = (cfg.has('monthsToLookAhead'))? cfg.monthsToLookAhead : 2;
 
 /*
  * Setup calendars
  */
 
-var calendarParams = {
-  name:             "Work Primary",
-  calendarId:       cfg.get('calendars.workPrimary.calendarId'),
-  googleScopes:     cfg.get('auth.scopes'),
-  tokenFile:        cfg.get('auth.tokenFile'),
-  tokenDir:         cfg.get('auth.tokenFileDir'),
-  clientSecretFile: cfg.get('auth.clientSecretFile'),
+const calendarParams = {
+  googleScopes:     cfg.auth.googleScopes,
+  tokenFile:        cfg.auth.tokenFile,
+  tokenDir:         cfg.auth.tokenFileDir,
+  clientSecretFile: cfg.auth.clientSecretFile,
   log4js:           log4js,
-  logLevel:         cfg.get('log.level')
+  logLevel:         cfg.log.level
 }
-var workPrimary = new calendarModel(calendarParams);
 
-calendarParams.name             = "Support Rota"
-calendarParams.calendarId       = cfg.get('calendars.support.calendarId')
+const satelliteCalendar = new calendarModel(Object.assign({},calendarParams,{
+  name: "Satellite",
+  calendarId: cfg.calendars.satellite.calendarId
+}));
 
-var supportRota = new calendarModel(calendarParams);
+const sourceCalendar = new calendarModel(Object.assign({},calendarParams,{
+  name: "Source",
+  calendarId: cfg.calendars.source.calendarId
+}));
 
 
 
 
 function addShift (supportRotaEv) {
 
-  var attendees = cfg.get('calendars.workPrimary.attendees');
+  const attendees = cfg.calendars.satellite.attendees;
+
+  const satelliteEventSummary = (() => {
+    if (cfg.calendars.satellite.prefixText) { return ""+cfg.calendars.satellite.prefixText+supportRotaEv.summary}
+    return summary
+  })()
   
-  var newEv = {}
-  newEv.summary   = supportRotaEv.summary;
-  newEv.start     = supportRotaEv.start;
-  newEv.end       = supportRotaEv.end;
-  newEv.reminders = supportRotaEv.reminders;
-  newEv.attendees = attendees;
+  const newEv = {
+    summary: satelliteEventSummary,
+    extendedProperties: {
+      private: {
+        syncCalendarToken: cfg.calendars.satellite.syncToken
+      }
+    },
+    attendees,
+    start: supportRotaEv.start,
+    end: supportRotaEv.end,
+    hangoutLink: supportRotaEv.hangoutLink
+  }
 
   log.info('========')
   log.info('Creating shift:')
   log.info('Summary:    ' + newEv.summary);
   log.info('Start Time: ' + newEv.start.dateTime);
   log.info('End Time:   ' + newEv.end.dateTime);
-  
-  workPrimary.addEventToGoogle(newEv, function(resp) {});
+
+  satelliteCalendar.addEventToGoogle(newEv, function(resp) {});
   
   // If it is an L1 event, add a reminder the next morning
-  if (useHandoverReminders
-      && newEv.summary == cfg.get('calendars.support.usernameSearch')+" L1") {
+  if (useHandoverReminders && newEv.summary == cfg.get('calendars.source.searchText')+" L1") {
   
     log.info('Creating reminder for L1 shift')
   
@@ -110,7 +118,7 @@ function addShift (supportRotaEv) {
     reminderEv.end       = {dateTime: endTime}
     reminderEv.attendees = attendees;
 
-    workPrimary.addEventToGoogle(reminderEv, function(resp) {});
+    satelliteCalendar.addEventToGoogle(reminderEv, function(resp) {});
   }
 
 
@@ -122,11 +130,10 @@ function addShift (supportRotaEv) {
 
 function removeShift (ev) {
 
-  workPrimary.deleteEventFromGoogle(ev, function () {})
+  satelliteCalendar.deleteEventFromGoogle(ev, function () {})
 
   // If it is an L1 event, delete next morning's reminder
-  if (useHandoverReminders
-      && ev.summary == cfg.get('calendars.support.usernameSearch')+" (L1)") {
+  if (useHandoverReminders && ev.summary == cfg.get('calendars.source.searchText')+" (L1)") {
   
     log.info('Removing reminder for L1 shift')
   
@@ -142,14 +149,14 @@ function removeShift (ev) {
       textSearch: "Send handover email"
     }
 
-    workPrimary.loadEventsFromGoogle(params, function (handoverReminderEvs) {
+    satelliteCalendar.loadEventsFromGoogle(params, function (handoverReminderEvs) {
 
       // There is a possibility we have multiple handover reminders.
       // While this shouldn't have happened, it's not a problem to just nuke all.
       for (var i in handoverReminderEvs) { 
 
         var hrEv = handoverReminderEvs[i];
-        workPrimary.deleteEventFromGoogle(hrEv)
+        satelliteCalendar.deleteEventFromGoogle(hrEv)
       }
 
     })
@@ -164,94 +171,110 @@ function removeShift (ev) {
 // I.e. you're syncing all events between today and 2 months hence.
 var d = new Date();
 var timeMin = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-var timeMax = new Date(new Date(timeMin).setMonth(timeMin.getMonth()+2))
+var timeMax = new Date(new Date(timeMin).setMonth(timeMin.getMonth()+monthsToLookAhead))
+//var timeMax = new Date(new Date(timeMin).setDate(timeMin.getDate()+7))
 
-var params = {
+const sourceCalendarSearchParams = {
   timeMin: timeMin,
   timeMax: timeMax,
-  textSearch: cfg.get('calendars.support.usernameSearch')
+  textSearch: cfg.calendars.source.searchText
 }
 
-supportRota.loadEventsFromGoogle(params, function (srEvs) {
- 
-  log.trace('Support Rota:');
-  log.trace(srEvs);
+sourceCalendar.loadEventsFromGoogle(sourceCalendarSearchParams, function (sourceCalendarEvents) {
 
-  workPrimary.loadEventsFromGoogle(params, function (wpEvs) {
+  log.trace('Source Calendar:');
+  log.trace(sourceCalendarEvents);
 
-    log.trace('Work Calendar:');
-    log.trace(wpEvs);
+
+  const satelliteCalendarSearchParams = {
+    timeMin,
+    timeMax,
+    privateExtendedProperty: `syncCalendarToken=${cfg.calendars.satellite.syncToken}`,
+    retFields: "items(id,summary,startTime,endTime)"
+  }
+
+  satelliteCalendar.loadEventsFromGoogle(satelliteCalendarSearchParams, function (satelliteCalendarEvents) {
+
+    log.trace('Satellite Calendar:');
+    log.trace(satelliteCalendarEvents);
 
     /*
     * Loop through each item comparing the name, start time,
     * and end time. That's what makes them a match.
     */
-    for (var i in srEvs) { 
+    for (var i in sourceCalendarEvents) { 
 
-      var srEv = srEvs[i];
+      var sourceCalendarEvent = sourceCalendarEvents[i];
 
-      var id        = srEv.id;
-      var summary   = srEv.summary;
-      var startTime = new Date(srEv.start.dateTime);
-      var endTime   = new Date(srEv.end.dateTime);
-      var srEvStr   = supportRota.getEventString(srEv)
+      var sourceCalendarEventString = sourceCalendar.getEventString(sourceCalendarEvent)
+      var id        = sourceCalendarEvent.id;
+      var summary   = sourceCalendarEvent.summary;
+      var startTime = new Date(sourceCalendarEvent.start.dateTime);
+      var endTime   = new Date(sourceCalendarEvent.end.dateTime);
 
-      log.info('Comparing event: ' + srEvStr);
+      log.info('Comparing event: ' + sourceCalendarEventString);
       log.debug('Event Id:      ' + id);
       log.debug('Event summary: ' + summary);
       log.debug('Start Time:    ' + startTime);
       log.debug('End Time:      ' + endTime);
 
-
       var matched = false
 
-      for (var j in wpEvs) {
+      const satelliteEventComparisonSummary = (() => {
+        if (cfg.calendars.satellite.prefixText) { return ""+cfg.calendars.satellite.prefixText+summary}
+        return summary
+      })()
+      log.debug('Comparison:    ' + satelliteEventComparisonSummary);
 
-        var wpEv = wpEvs[j];
+      for (var j in satelliteCalendarEvents) {
 
-        var id2        = wpEv.id;
-        var summary2   = wpEv.summary;
-        var startTime2 = new Date(wpEv.start.dateTime);
-        var endTime2   = new Date(wpEv.end.dateTime);
-      
-	var wpEvStr = workPrimary.getEventString(wpEv)
+        var satelliteCalendarEvent = satelliteCalendarEvents[j];
 
-	log.debug('+--> Comparison Event: ' + wpEvStr);
+        var satelliteCalendarEventString = satelliteCalendar.getEventString(satelliteCalendarEvent)
+
+        var id2        = satelliteCalendarEvent.id;
+        var summary2   = satelliteCalendarEvent.summary;
+        var startTime2 = new Date(satelliteCalendarEvent.start.dateTime);
+        var endTime2   = new Date(satelliteCalendarEvent.end.dateTime);
+
+        // Determine the comparison string
+
+        log.debug('+--> Comparison Event: ' + satelliteCalendarEventString);
         log.debug('Event Id:      ' + id2);
         log.debug('Event summary: ' + summary2);
         log.debug('Start Time:    ' + startTime2);
         log.debug('End Time:      ' + endTime2);
 
-	if (summary == summary2
-	    && startTime.getTime() == startTime2.getTime()
-	    && endTime.getTime() == endTime2.getTime()
-	) {
+        if (satelliteEventComparisonSummary == summary2
+            && startTime.getTime() == startTime2.getTime()
+            && endTime.getTime() == endTime2.getTime()
+        ) {
 
-          log.info('+ Matched event: ' + wpEvStr);
-	  matched = true
+          log.info('+ Matched event: ' + satelliteCalendarEventString);
+          matched = true
 
-	  delete wpEvs[j];
-	  break
+          delete satelliteCalendarEvents[j];
+          break
 
-	}
+        }
 
       }
 
       if (!matched) {
-        log.info('No matches found for %s', srEvStr)
-	addShift(srEv)
+        log.info('No matches found for %s', sourceCalendarEventString)
+        addShift(sourceCalendarEvent)
       }
     }
 
     // Any events left over in the work calendar are unwanted. They
     // were probably shifts that were given away.
-    for (var j in wpEvs) {
+    for (var j in satelliteCalendarEvents) {
 
-      var wpEv = wpEvs[j]
+      var satelliteCalendarEvent = satelliteCalendarEvents[j]
 
-      log.info('Deleting extra event in work calendar: ' + workPrimary.getEventString(wpEv))
-      removeShift(wpEv);
-      delete wpEvs[j];
+      log.info('Deleting extra event in satellite calendar: ' + satelliteCalendar.getEventString(satelliteCalendarEvent))
+      removeShift(satelliteCalendarEvent);
+      delete satelliteCalendarEvents[j];
 
     }
 

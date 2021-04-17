@@ -2,34 +2,51 @@ var cfg   = require('config');
 var defer = require('config/defer').deferConfig;
 
 module.exports = {
-  appName: process.env.npm_package_config_appName,
+
+  appName: 'sync-calendars',
 
   auth: {
-    credentialsDir:   process.env.HOME+"/.credentials",
-    clientSecretFile: defer( function (cfg) { return cfg.auth.credentialsDir+"/client_secret.json" } ),
+    credentialsDir:   process.env.HOME+'/.credentials',
+    clientSecretFile: defer( function (cfg) { return cfg.auth.credentialsDir+'/client_secret.json' } ),
     tokenFileDir:     defer( function (cfg) { return cfg.auth.credentialsDir } ),
-    tokenFile:        defer( function (cfg) { return "access_token_"+cfg.appName+".json" } ),
-    scopes:           process.env.npm_package_config_googleAuthScopes.split(",")
+    tokenFile:        defer( function (cfg) {
+      return 'access_token_'.concat(
+        cfg.appName,
+        (process.env.NODE_ENV)? `-${process.env.NODE_ENV}` : "",
+        (process.env.NODE_APP_INSTANCE)? `-${process.env.NODE_APP_INSTANCE}`: "",
+        ".json"
+      )
+    }),
+    googleScopes:     ['https://www.googleapis.com/auth/calendar']
   },
 
   log: {
     appName: defer(function (cfg) { return cfg.appName } ),
-    level:   "INFO",
+    level:   'INFO',
+    logDir: './logs',
     log4jsConfigs: {
       appenders: [
         {
-          type:       "file",
-          filename:   defer(function (cfg) { return cfg.log.logDir.concat("/" , cfg.appName , ".log" ) }),
-          category:   defer(function (cfg) { return cfg.appName }),
-          reloadSecs: 60,
-          maxLogSize: 1024000
+          type:       'console'
         },
         {
-          type: "console"
+          type:       'file',
+          filename:   defer(function (cfg) {
+            return cfg.log.logDir.concat(
+              "/" + cfg.appName,
+              (process.env.NODE_ENV)? `-${process.env.NODE_ENV}` : "",
+              (process.env.NODE_APP_INSTANCE)? `-${process.env.NODE_APP_INSTANCE}`: "",
+              ".log"
+            )
+          }),
+          category:   defer(function (cfg) { return cfg.log.appName }),
+          reloadSecs: 60,
+          maxLogSize: 256000
         }
-      ],
-      replaceConsole: true
-    },
-    logDir: "./logs"
-  }
-} 
+      ]
+    }
+  },
+
+  useHandoverReminders: false
+
+}
