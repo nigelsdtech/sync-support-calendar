@@ -35,3 +35,6 @@ node_modules
 
 # Private configs
 config/local*
+
+# Compiles typescript
+compiled

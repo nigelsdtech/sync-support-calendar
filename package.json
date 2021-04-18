@@ -3,19 +3,21 @@
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
-    "calendar-model": "git://github.com/nigelsdtech/calendar-model.git#aa9936399e042edf4749c2aec770205c1e0e2dd1",
+    "calendar-model": "github:nigelsdtech/calendar-model",
     "config": "1.x",
     "googleapis": "~2.1.6",
+    "js-yaml": "^4.1.0",
     "log4js": "0.x"
   },
   "scripts": {
     "start": "sh scripts/start.sh",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf compiled && tsc"
   },
   "keywords": [],
   "author": "Nigel Stephen D'Souza",
   "license": "ISC",
-  "description": "Syncronizes the support rota with my work primary calendar",
+  "description": "Syncronizes events from a 'source' calendar to a 'satellite' calendar",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nigelsdtech/sync-support-calendar.git"
@@ -24,5 +26,8 @@
     "url": "https://github.com/nigelsdtech/sync-support-calendar/issues"
   },
   "homepage": "https://github.com/nigelsdtech/sync-support-calendar#readme",
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/node": "^14.14.41",
+    "typescript": "^4.2.4"
+  }
 }

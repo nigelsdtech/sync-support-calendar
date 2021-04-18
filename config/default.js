@@ -47,6 +47,18 @@ module.exports = {
     }
   },
 
-  useHandoverReminders: false
+  useHandoverReminders: false,
 
+  calendars: {
+    source: {
+      calendarId: "OVERRIDE_ME",
+      searchText: "OVERRIDE_ME"
+    },
+    satellite: {
+      calendarId: "primary",
+      prefixText: null,
+      syncToken: process.env.NODE_APP_INSTANCE,
+      attendees: null
+    }
+  }
 }
