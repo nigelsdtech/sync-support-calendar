@@ -139,7 +139,6 @@ export function deleteEvent ({
     log
 }) : void {
 
-    return
     calendar.deleteEventFromGoogle(event, function (err, resp) {
         if (err) {
             const errMsg = `Problem deleting ${event.id}: ${err}`
