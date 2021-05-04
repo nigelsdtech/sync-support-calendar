@@ -52,7 +52,6 @@ function main () {
 
   const calendarParams = {
     googleScopes:     cfg.auth.googleScopes,
-    tokenFile:        cfg.auth.tokenFile,
     tokenDir:         cfg.auth.tokenFileDir,
     clientSecretFile: cfg.auth.clientSecretFile,
     log4js:           log4js,
@@ -61,11 +60,15 @@ function main () {
 
   const sourceCalendar = new calendarModel(Object.assign({},calendarParams,{
     name: "Source",
-    calendarId: cfg.calendars.source.calendarId
+    calendarId:   cfg.calendars.source.calendarId,
+    tokenFile:    cfg.calendars.source.auth.tokenFile,
+    googleScopes: cfg.calendars.source.auth.googleScopes,
   }));
   const satelliteCalendar = new calendarModel(Object.assign({},calendarParams,{
     name: "Satellite",
-    calendarId: cfg.calendars.satellite.calendarId
+    calendarId:   cfg.calendars.satellite.calendarId,
+    tokenFile:    cfg.calendars.satellite.auth.tokenFile,
+    googleScopes: cfg.calendars.satellite.auth.googleScopes
   }));
 
 
@@ -151,7 +154,8 @@ function main () {
             eventDetails: sourceCalendarEvent,
             syncToken: cfg.calendars.satellite.syncToken,
             attendees: cfg.calendars.satellite.attendees,
-            prefixText: cfg.calendars.satellite.prefixText
+            prefixText: cfg.calendars.satellite.prefixText,
+            overriddenSummary: cfg.calendars.satellite.overriddenSummary
           })
           addEvent({eventDetails, calendar: satelliteCalendar, log})
         }
@@ -178,7 +182,11 @@ function logEventDetails (
   {id, summary, start, end}: Pick<iCalendarEvent, "id" | "summary" | "start" | "end">
 ): void {
 
-  const comparisonSummary = determineEventSummary({summary, prefixText: cfg.calendars.satellite.prefixText})
+  const comparisonSummary = determineEventSummary({
+    summary,
+    prefixText: cfg.calendars.satellite.prefixText,
+    overriddenSummary: cfg.calendars.satellite.overriddenSummary
+  })
   const eventString = calendarModel.prototype.getEventString({id, summary, start, end})
 
   log.info ('Event Key:          ' + eventString);

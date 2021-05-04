@@ -12,7 +12,7 @@ module.exports = {
     tokenFile:        defer( function (cfg) {
       return 'access_token_'.concat(
         cfg.appName,
-        (process.env.NODE_ENV)? `-${process.env.NODE_ENV}` : "",
+        (process.env.NODE_ENV && process.env.NODE_ENV != "production")? `-${process.env.NODE_ENV}` : "",
         (process.env.NODE_APP_INSTANCE)? `-${process.env.NODE_APP_INSTANCE}`: "",
         ".json"
       )
@@ -52,13 +52,22 @@ module.exports = {
   calendars: {
     source: {
       calendarId: "OVERRIDE_ME",
-      searchText: "OVERRIDE_ME"
+      searchText: "OVERRIDE_ME",
+      auth: {
+        tokenFile:  defer( function (cfg) { return cfg.auth.tokenFile.replace(".json", "-source.json") } ),
+        googleScopes: ['https://www.googleapis.com/auth/calendar.events.readonly']
+      }
     },
     satellite: {
       calendarId: "primary",
       prefixText: null,
       syncToken: process.env.NODE_APP_INSTANCE,
-      attendees: null
+      attendees: null,
+      overriddenSummary: null,
+      auth: {
+        tokenFile:  defer( function (cfg) { return cfg.auth.tokenFile.replace(".json", "-satellite.json") } ),
+        googleScopes: ['https://www.googleapis.com/auth/calendar.events']
+      }
     }
   }
 }

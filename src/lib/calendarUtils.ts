@@ -6,21 +6,21 @@ export type eventTimeData = {
     timeZone: string
 }
 
+type tAttendee = {
+    email: string,
+    displayName: string,
+    organizer: boolean,
+    self: boolean,
+    responseStatus: string
+}
+
 export interface iCalendarEvent {
     id: string,
     summary: string,
     description: string,
     start: eventTimeData,
     end: eventTimeData,
-    attendees: [
-        {
-            email: string,
-            displayName: string,
-            organizer: boolean,
-            self: boolean,
-            responseStatus: string
-        }
-    ],
+    attendees: tAttendee[],
     hangoutLink?: string,
     reminders?: {
         useDefault: boolean
@@ -31,11 +31,15 @@ export interface iCalendarEvent {
 }
 
 export function determineEventSummary ({
-    summary, prefixText
+    summary,
+    prefixText,
+    overriddenSummary
 } :{
     summary: string,
-    prefixText?
+    prefixText: string | null,
+    overriddenSummary: string | null
 }): string {
+    if (overriddenSummary) { return overriddenSummary }
     if (prefixText) { return "" + prefixText + summary }
     return summary
 }
@@ -45,15 +49,17 @@ export function prepareEventDetails ({
     eventDetails,
     syncToken,
     attendees,
-    prefixText
+    prefixText,
+    overriddenSummary
 } : {
     eventDetails: iCalendarEvent,
     syncToken: string,
     attendees,
-    prefixText: string
+    prefixText: string | null,
+    overriddenSummary: string | null
 }): tNewCalendarEvent {
 
-    const eventSummary = determineEventSummary({summary: eventDetails.summary, prefixText})
+    const eventSummary = determineEventSummary({summary: eventDetails.summary, prefixText, overriddenSummary})
 
     const newEv = {
         description: eventDetails.description,
@@ -90,6 +96,7 @@ export function addEvent ({
     log.info(`[${hash}] Start Time: ${JSON.stringify(eventDetails.start)}`);
     log.info(`[${hash}] End Time:   ${JSON.stringify(eventDetails.end)}`);
 
+    log.error('Stub add'); return;
 
     calendar.addEventToGoogle(eventDetails, (err, resp) => {
 
@@ -139,6 +146,7 @@ export function deleteEvent ({
     log
 }) : void {
 
+    log.error('Stub delete'); return;
     return
     calendar.deleteEventFromGoogle(event, function (err, resp) {
         if (err) {
