@@ -96,8 +96,6 @@ export function addEvent ({
     log.info(`[${hash}] Start Time: ${JSON.stringify(eventDetails.start)}`);
     log.info(`[${hash}] End Time:   ${JSON.stringify(eventDetails.end)}`);
 
-    log.error('Stub add'); return;
-
     calendar.addEventToGoogle(eventDetails, (err, resp) => {
 
         if (err) {
@@ -146,8 +144,6 @@ export function deleteEvent ({
     log
 }) : void {
 
-    log.error('Stub delete'); return;
-    return
     calendar.deleteEventFromGoogle(event, function (err, resp) {
         if (err) {
             const errMsg = `Problem deleting ${event.id}: ${err}`
