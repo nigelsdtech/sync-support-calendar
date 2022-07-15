@@ -44,17 +44,15 @@ export function determineEventSummary ({
     return summary
 }
 
-type tNewCalendarEvent = Omit<iCalendarEvent, "id">
-export function prepareEventDetails ({
+type tNewCalendarEvent = Pick<iCalendarEvent, "summary" | "start" | "end" | "extendedProperties">
+export function prepareNewEventDetails ({
     eventDetails,
     syncToken,
-    attendees,
     prefixText,
     overriddenSummary
 } : {
     eventDetails: iCalendarEvent,
     syncToken: string,
-    attendees,
     prefixText: string | null,
     overriddenSummary: string | null
 }): tNewCalendarEvent {
@@ -62,12 +60,9 @@ export function prepareEventDetails ({
     const eventSummary = determineEventSummary({summary: eventDetails.summary, prefixText, overriddenSummary})
 
     const newEv = {
-        description: eventDetails.description,
         summary: eventSummary,
-        attendees,
         start: eventDetails.start,
         end: eventDetails.end,
-        hangoutLink: eventDetails.hangoutLink,
         extendedProperties: {
             private: {
                 syncCalendarToken: syncToken
@@ -106,29 +101,6 @@ export function addEvent ({
         }
         log.info(`[${hash}] Created event: \n${JSON.stringify(resp)}`)
     });
-    
-    /*
-    // If it is an L1 event, add a reminder the next morning
-    if (useHandoverReminders && newEv.summary == cfg.get('calendars.source.searchText')+" L1") {
-    
-        log.info('Creating reminder for L1 shift')
-    
-    
-        // The reminder goes off at 9 am the next day
-        var d = new Date(newEv.start.dateTime);
-        var startTime = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1, 9, 0);
-        var endTime   = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1, 9, 1);
-
-        var reminderEv = {}
-        reminderEv.summary   = "Send handover email"
-        reminderEv.reminders = {setDefault: 1}
-        reminderEv.start     = {dateTime: startTime}
-        reminderEv.end       = {dateTime: endTime}
-        reminderEv.attendees = attendees;
-
-        calendar.addEventToGoogle(reminderEv, function(resp) {});
-    }
-    */
 }
 
 
@@ -151,40 +123,6 @@ export function deleteEvent ({
             throw errMsg
         }
     })
-
-    /*
-    // If it is an L1 event, delete next morning's reminder
-    if (useHandoverReminders && ev.summary == cfg.get('calendars.source.searchText')+" (L1)") {
-
-        log.info('Removing reminder for L1 shift')
-
-
-        // The reminder goes off at 9 am the next day
-        var d = new Date(ev.start.dateTime);
-        var timeMin = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1, 9, 0);
-        var timeMax = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1, 9, 1);
-
-        var params = {
-        timeMin: timeMin,
-        timeMax: timeMax,
-        textSearch: "Send handover email"
-        }
-
-        satelliteCalendar.loadEventsFromGoogle(params, function (handoverReminderEvs) {
-
-        // There is a possibility we have multiple handover reminders.
-        // While this shouldn't have happened, it's not a problem to just nuke all.
-        for (var i in handoverReminderEvs) { 
-
-            var hrEv = handoverReminderEvs[i];
-            satelliteCalendar.deleteEventFromGoogle(hrEv)
-        }
-
-        })
-
-    }
-    */
-
 }
 
 export function extractTimeStamp ({
