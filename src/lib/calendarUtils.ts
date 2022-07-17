@@ -45,13 +45,15 @@ export function determineEventSummary ({
 }
 
 type tNewCalendarEvent = Pick<iCalendarEvent, "summary" | "start" | "end" | "extendedProperties">
-export function prepareNewEventDetails ({
+export function prepareEventDetails ({
     eventDetails,
+    attendees,
     syncToken,
     prefixText,
     overriddenSummary
 } : {
     eventDetails: iCalendarEvent,
+    attendees: tAttendee[]
     syncToken: string,
     prefixText: string | null,
     overriddenSummary: string | null
@@ -63,6 +65,7 @@ export function prepareNewEventDetails ({
         summary: eventSummary,
         start: eventDetails.start,
         end: eventDetails.end,
+        attendees,
         extendedProperties: {
             private: {
                 syncCalendarToken: syncToken
