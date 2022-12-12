@@ -5,7 +5,7 @@
   "dependencies": {
     "calendar-model": "github:nigelsdtech/calendar-model",
     "config": "1.x",
-    "googleapis": "~2.1.6",
+    "googleapis": "~109.0.1",
     "js-yaml": "^4.1.0",
     "log4js": "0.x"
   },
